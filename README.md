@@ -12,5 +12,5 @@ The SwaggerUI for detailed API description can be found here:
 ## Config Variables
 To connect to a MongoDB database and to a collection, the following variables have to be set:
 
-    spring.data.mongodb.uri=secret
-    application.collection.name=secret
+    spring.data.mongodb.uri={secret}
+    application.collection.name={secret}
