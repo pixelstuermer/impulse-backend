@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.github.pixelstuermer.impulse.backend.constants.ServerConstants;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -21,9 +23,9 @@ public class BaseController {
 
    @RequestMapping( path = "/", method = RequestMethod.GET )
    @ApiOperation( value = "Redirect to SwaggerUI", hidden = true )
-   public RedirectView redirectSwagger( @Value( "${server.contextPath}" ) String contextPath ) {
+   public RedirectView redirectToSwagger( @Value( "${server.contextPath}" ) String contextPath ) {
       LOGGER.info( "Request for ErrorPathController, so redirect to SwaggerUI" );
-      return new RedirectView( contextPath + "/swagger-ui.html" );
+      return new RedirectView( contextPath + "/" + ServerConstants.SWAGGER_URI );
    }
 
    @RequestMapping( path = "/ping", method = RequestMethod.GET )
