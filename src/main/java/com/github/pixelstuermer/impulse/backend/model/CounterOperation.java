@@ -4,9 +4,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Getter;
 
 @Getter
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class CounterOperation {
 
    private Map<String, Object> metaData;

@@ -1,5 +1,11 @@
 package com.github.pixelstuermer.impulse.backend.api;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +16,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pixelstuermer.impulse.backend.constants.MongoConstants;
 import com.github.pixelstuermer.impulse.backend.model.Collection;
 import com.github.pixelstuermer.impulse.backend.model.Counter;
+import com.github.pixelstuermer.impulse.backend.model.CounterOperation;
+import com.github.pixelstuermer.impulse.backend.model.Download;
 import com.github.pixelstuermer.impulse.backend.util.DatabaseHandler;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -70,6 +81,37 @@ public class CounterController {
          LOGGER.error( "Request for DecreaseCounterController with -1 failed" );
          return ResponseEntity.status( 400 ).build();
       }
+   }
+
+   @RequestMapping( path = "/download", method = RequestMethod.GET, produces = "application/json" )
+   @ApiOperation( value = "Download the counter documents" )
+   public ResponseEntity<Download> downloadCounterDocuments( HttpServletResponse response )
+      throws JsonProcessingException {
+      // run mongo query and convert to pojo
+      ObjectMapper mapper = new ObjectMapper();
+      DBCursor cursor = mongoTemplate.getCollection( collection.getName() ).find();
+      List<CounterOperation> counterOperationList = new ArrayList<>();
+      while ( cursor.hasNext() ) {
+         BasicDBObject document = (BasicDBObject) cursor.next();
+         String documentAsString = mapper.writeValueAsString( document );
+         CounterOperation counterOperation = mapper.convertValue( documentAsString, CounterOperation.class );
+         counterOperationList.add( counterOperation );
+      }
+
+      // get counters
+      Counter counter = getCaclculatedCounter().getBody();
+
+      // set response headers
+      String filename = "counter-documents-" + new Date().getTime();
+      response.addHeader( "Content-disposition", "attachment;filename=" + filename + ".json" );
+      response.setContentType( "application/json" );
+
+      // prepare download
+      Download download = Download.builder()
+         .counter( counter )
+         .counterOperationList( counterOperationList ).build();
+
+      return ResponseEntity.status( 200 ).body( download );
    }
 
 }
