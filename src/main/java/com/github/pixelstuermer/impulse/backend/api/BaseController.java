@@ -21,7 +21,7 @@ public class BaseController {
 
    private final Logger LOGGER = LoggerFactory.getLogger( this.getClass() );
 
-   @RequestMapping( path = "/", method = RequestMethod.GET )
+   @RequestMapping( path = { "/", "" }, method = RequestMethod.GET )
    @ApiOperation( value = "Redirect to SwaggerUI", hidden = true )
    public RedirectView redirectToSwagger( @Value( "${server.contextPath}" ) String contextPath ) {
       LOGGER.info( "Request for ErrorPathController, so redirect to SwaggerUI" );

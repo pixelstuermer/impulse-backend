@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.pixelstuermer.impulse.backend.constants.MongoConstants;
 import com.github.pixelstuermer.impulse.backend.model.Collection;
+import com.github.pixelstuermer.impulse.backend.model.Counter;
 import com.github.pixelstuermer.impulse.backend.util.DatabaseHandler;
 
 import io.swagger.annotations.Api;
@@ -29,6 +30,19 @@ public class CounterController {
 
    @Autowired
    Collection collection;
+
+   @RequestMapping( path = "", method = RequestMethod.GET )
+   @ApiOperation( value = "Get the calculated counter" )
+   public ResponseEntity<Counter> getCaclculatedCounter() {
+      int increaseCounter = DatabaseHandler
+         .getCounterDocuments( mongoTemplate, collection.getName(), MongoConstants.INCREASE );
+      int decreaseCounter = DatabaseHandler
+         .getCounterDocuments( mongoTemplate, collection.getName(), MongoConstants.DECREASE );
+      Counter counter = new Counter( increaseCounter, decreaseCounter );
+      LOGGER.info( "Request for GetCaclculatedCounter with {} - {} = {}",
+         counter.getIncreaseCounter(), counter.getDecreaseCounter(), counter.getCounter() );
+      return ResponseEntity.status( 200 ).body( counter );
+   }
 
    @RequestMapping( path = "/increase", method = RequestMethod.POST )
    @ApiOperation( value = "Increase the impulse counter with +1" )
