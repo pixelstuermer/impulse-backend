@@ -1,5 +1,6 @@
 package com.github.pixelstuermer.impulse.backend.api;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -86,15 +87,15 @@ public class CounterController {
    @RequestMapping( path = "/download", method = RequestMethod.GET, produces = "application/json" )
    @ApiOperation( value = "Download the counter documents" )
    public ResponseEntity<Download> downloadCounterDocuments( HttpServletResponse response )
-      throws JsonProcessingException {
+      throws IOException {
       // run mongo query and convert to pojo
       ObjectMapper mapper = new ObjectMapper();
       DBCursor cursor = mongoTemplate.getCollection( collection.getName() ).find();
       List<CounterOperation> counterOperationList = new ArrayList<>();
       while ( cursor.hasNext() ) {
          BasicDBObject document = (BasicDBObject) cursor.next();
-         String documentAsString = mapper.writeValueAsString( document );
-         CounterOperation counterOperation = mapper.convertValue( documentAsString, CounterOperation.class );
+         String documentAsString = document.toJson();
+         CounterOperation counterOperation = mapper.readValue( documentAsString, CounterOperation.class );
          counterOperationList.add( counterOperation );
       }
 
